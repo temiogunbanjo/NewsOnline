@@ -1,0 +1,1 @@
+export const BASE_URL = "https://dev-agro-service.tradebuza.com/api/v3";
