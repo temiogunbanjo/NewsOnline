@@ -1,6 +1,6 @@
 import { combineReducers } from "redux";
-import DashboardReducer from './LandingPageReducer';
+import LandingPageReducer from './LandingPageReducer';
 
 export default combineReducers({
-  DashboardReducer
+  LandingPageReducer
 });

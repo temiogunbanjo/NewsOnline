@@ -1,15 +1,27 @@
-import {
-  GET_DASHBOARD_DETAILS,
-  DASHBOARD_DETAILS_SUCCESS,
-  DASHBOARD_DETAILS_FAIL
-} from "../types/LandingPageTypes";
+import { GET_NEWS, GET_NEWS_SUCCESS, GET_NEWS_FAIL } from "../types";
 
 const initialState = {
-  dashboardData: {
-    total_acreage: '-',
-    number_of_farmers: '-',
-    lots: []
-  },
+  news: [
+    {
+      type: "dummy",
+    },
+    {
+      type: "dummy",
+    },
+    {
+      type: "dummy",
+    },
+    {
+      type: "dummy",
+    },
+    {
+      type: "dummy",
+    },
+    {
+      type: "dummy",
+    },
+  ],
+  totalPages: 1,
   loading: false,
 };
 
@@ -18,21 +30,21 @@ export default function (state = initialState, action) {
   const { type, payload } = action;
 
   switch (type) {
-    case GET_DASHBOARD_DETAILS:
+    case GET_NEWS:
+      console.log({ state });
       return {
         ...state,
-        ...payload,
         loading: true,
       };
 
-    case DASHBOARD_DETAILS_SUCCESS:
+    case GET_NEWS_SUCCESS:
       return {
         ...state,
         ...payload,
-        loading: false
+        loading: false,
       };
 
-    case DASHBOARD_DETAILS_FAIL:
+    case GET_NEWS_FAIL:
       return {
         ...state,
         ...payload,

@@ -1,137 +1,105 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 
 import Stack from "@mui/material/Stack";
-// import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
+import Pagination from "@mui/material/Pagination";
+import PaginationItem from "@mui/material/PaginationItem";
+import ArrowBackIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
+import ArrowForwardIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
+
+import Spinner from "../components/Spinner";
+import NewsCard from "../components/NewsCard";
+import LazyNewsCard from "../components/LazyNewsCard";
+
+import { getNews } from "../redux/actions";
 import Typography from "@mui/material/Typography";
 
-// import Button from "../components/common/Button"; 
-import Spinner from "../components/Spinner";
-
-import { getNews } from "../redux/actions/LandingPageActions";
-
 export default function LandingMain(props) {
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(10);
-  const [query, setQuery] = useState("");
-
-  const dashboardData = useSelector(
-    (state) => state.DashboardReducer.dashboardData
-  );
-  const isLoading = useSelector((state) => state.DashboardReducer.loading);
-
-  // onChange function for select
-  const handleLimitChange = (e) => {
-    setLimit(parseInt(e.target.value));
-  };
-
-  const setPrev = () => {
-    if (page > 1) setPage(page - 1);
-  };
-
-  const setNext = () => {
-    setPage(page + 1);
-  };
-
-  const cardStyles = {
-    minWidth: 275,
-    boxShadow: "0px 5px 20px rgba(108, 117, 125, 0.15)",
-    backgroundColor: "primary.main",
-    flexGrow: 1,
-    marginTop: "10px !important",
-    marginBottom: "10px !important",
-    p: 1.8,
-  };
-
-  // const tableData = useMemo(
-  //   () => dashboardData.lots || [],
-  //   [dashboardData.lots]
-  // );
-
+  const pageSize = 6;
+  const location = useLocation();
   const dispatch = useDispatch();
+  const query = new URLSearchParams(location.search);
+
+  const [page, setPage] = useState(parseInt(query.get("page") || "1", 10));
+
+  const news = useSelector((state) => state.LandingPageReducer.news);
+  const totalPages = useSelector(
+    (state) => state.LandingPageReducer.totalPages
+  );
+  const isLoading = useSelector((state) => state.LandingPageReducer.loading);
+
+  const handleChange = (event, value) => {
+    // console.log(value);
+    setPage(value);
+  };
 
   useEffect(() => {
-    dispatch(getDashboardDetails());
-  }, [dispatch]);
+    dispatch(
+      getNews({
+        q: "presidency",
+        page,
+        pageSize,
+      })
+    );
+  }, [dispatch, page]);
 
   return (
     <section>
-       <Stack
+      <div>
+        <Typography
+          variant="h3"
+          color="primary"
+          fontWeight={500}
+          fontSize="20px"
+          py="18px"
+          mt={2}
+          sx={{
+            borderBottom: "1px solid rgba(196, 196, 196, 1)",
+          }}
+        >
+          Latest News
+        </Typography>
+      </div>
+      <Stack
         direction="row"
         alignItems="stretch"
-        spacing={3}
         sx={{
-          mt: 6,
+          mt: 3,
           mb: 6,
-          overflowX: "auto",
-          flexWrap: {
-            xs: "wrap",
-            md: "nowrap",
-          },
+          flexWrap: "wrap",
         }}
       >
-        <Card sx={cardStyles}>
-          <CardContent sx={{ color: "white" }}>
-            <Typography
-              sx={{ fontSize: 18, fontWeight: 700 }}
-              color="inherit"
-              gutterBottom
-            >
-              Total Expected Yield (MT)
-            </Typography>
-            <Typography
-              variant="h5"
-              component="div"
-              sx={{ color: "inherit", fontSize: 24, fontWeight: 800 }}
-            >
-              {isLoading ? <Spinner size={20} /> : dashboardData.total_yield}
-            </Typography>
-          </CardContent>
-        </Card>
-
-        <Card sx={cardStyles}>
-          <CardContent sx={{ color: "white" }}>
-            <Typography
-              sx={{ fontSize: 18, fontWeight: 700 }}
-              color="inherit"
-              gutterBottom
-            >
-              Total Acreage (HA)
-            </Typography>
-            <Typography
-              variant="h5"
-              component="div"
-              sx={{ color: "inherit", fontSize: 24, fontWeight: 800 }}
-            >
-              {isLoading ? <Spinner size={20} /> : dashboardData.total_acreage}
-            </Typography>
-          </CardContent>
-        </Card>
-
-        <Card sx={cardStyles}>
-          <CardContent sx={{ color: "white" }}>
-            <Typography
-              sx={{ fontSize: 18, fontWeight: 700 }}
-              color="inherit"
-              gutterBottom
-            >
-              Total Number of Farmers
-            </Typography>
-            <Typography
-              variant="h5"
-              component="div"
-              sx={{ color: "inherit", fontSize: 24, fontWeight: 800 }}
-            >
-              {isLoading ? (
-                <Spinner size={20} />
-              ) : (
-                dashboardData.number_of_farmers
-              )}
-            </Typography>
-          </CardContent>
-        </Card>
+        {isLoading && !news.length ? (
+          <Spinner />
+        ) : (
+          news.map((article, index) =>
+            article.type === "dummy" ? (
+              <LazyNewsCard key={index} />
+            ) : (
+              <NewsCard key={index} data={article} />
+            )
+          )
+        )}
+      </Stack>
+      <Stack direction="row" justifyContent="flex-end" sx={{ mb: 4 }}>
+        {isLoading && !news.length ? null : (
+          <Pagination
+            page={page}
+            size="small"
+            count={Math.ceil(totalPages / pageSize)}
+            renderItem={(item) => (
+              <PaginationItem
+                components={{ previous: ArrowBackIcon, next: ArrowForwardIcon }}
+                to={`/${item.page === 1 ? "" : `?page=${item.page}`}`}
+                {...item}
+              />
+            )}
+            shape="rounded"
+            color="primary"
+            onChange={handleChange}
+          />
+        )}
       </Stack>
     </section>
   );
