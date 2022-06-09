@@ -8,7 +8,7 @@ axiosServices.interceptors.request.use(
   async (config) => {
     config.headers["x-api-key"] = process.env.REACT_APP_API_KEY || "";
     config.headers["mode"] = 'no-cors';
-    // config.url = BASE_URL + config.url;
+    config.url = BASE_URL + config.url;
     return config;
   },
   (error) => Promise.reject(error)

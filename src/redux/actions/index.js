@@ -1,4 +1,5 @@
-import axiosServices from '../../services/axiosServices';
+import axios from 'axios';
+// import axiosServices from '../../services/axiosServices';
 import { createQuery } from '../../utils/createQuery';
 
 import {
@@ -16,15 +17,19 @@ export const getNews = (queryParams) => async (dispatch) => {
     });
 
     const queryString = createQuery(queryParams);
-    const newsResponse = await axiosServices.get(`/everything${queryString}`);
+    const newsResponse = await axios.get(`https://newsapi.org/v2/everything${queryString}`, {
+      headers: {
+        "x-api-key": process.env.REACT_APP_API_KEY || ""
+      }
+    });
     console.log(newsResponse);
 
-    if (newsResponse?.articles) {
+    if (newsResponse?.data?.articles) {
       dispatch({
         type: GET_NEWS_SUCCESS,
         payload: {
-          news: newsResponse.articles,
-          totalPages: newsResponse.totalResults || 1
+          news: newsResponse.data.articles,
+          totalPages: newsResponse.data.totalResults || 1
         }
       });
     }
